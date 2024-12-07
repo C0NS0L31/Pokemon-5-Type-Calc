@@ -367,7 +367,7 @@ const effectivenessMatrix = {
 function getSelectedTypes() {
   let selectedTypes = [];
   for (let i = 1; i <= 5; i++) {
-    const type = document.getElementById(type${i}).value;
+    const type = document.getElementById(`type${i}`).value;
     if (type !== "None") { // Only add types that are not "None"
       selectedTypes.push(type);
     }
@@ -375,7 +375,7 @@ function getSelectedTypes() {
   return selectedTypes;
 }
 
-// Function to calculate effectiveness
+// Updated function to calculate and display combined effectiveness, including immunities
 function calculateEffectiveness() {
   const selectedTypes = getSelectedTypes(); // Get selected types
   
@@ -387,15 +387,24 @@ function calculateEffectiveness() {
     return;
   }
 
+  // Initialize combined effectiveness map
   const combinedEffectiveness = {};
 
-  // Loop through each selected type
+  // Initialize an array to store immunities
+  const immunities = new Set(); // Set will avoid duplicate immunities
+
+  // Loop through each selected type and calculate effectiveness
   selectedTypes.forEach(type => {
     for (let opponent in effectivenessMatrix[type]) {
       if (!combinedEffectiveness[opponent]) {
-        combinedEffectiveness[opponent] = 1; // Initialize multiplier
+        combinedEffectiveness[opponent] = 1; // Initialize with 1 for multiplication
       }
-      combinedEffectiveness[opponent] *= effectivenessMatrix[type][opponent]; // Multiply effectiveness
+      combinedEffectiveness[opponent] *= effectivenessMatrix[type][opponent]; // Multiply effectiveness values
+
+      // Check for immunity for the current type and add to immunities set if necessary
+      if (effectivenessMatrix[type][opponent] === 0) {
+        immunities.add(opponent); // Add opponent to immunities if immune (effectiveness 0)
+      }
     }
   });
 
@@ -405,55 +414,72 @@ function calculateEffectiveness() {
   // Sort the array by effectiveness (highest to lowest)
   effectivenessArray.sort((a, b) => b[1] - a[1]);
 
-  // Create separate arrays for weaknesses and resistances
+  // Create arrays to categorize weaknesses, resistances, and immunities
   const weaknesses = [];
   const resistances = [];
 
-  // Categorize types based on effectiveness
+  // Loop through the effectiveness array to categorize types
   effectivenessArray.forEach(([opponent, effectiveness]) => {
     let effectivenessText = "";
+    
+    // Check for immunity (effectiveness 0)
     if (effectiveness === 0) {
       effectivenessText = "No effect";
-    } else if (effectiveness === 1) {
-      effectivenessText = "Normal effectiveness";
-    } else if (effectiveness === 2) {
-      effectivenessText = "2x effectiveness";
-    } else if (effectiveness === 4) {
-      effectivenessText = "4x effectiveness";
-    } else if (effectiveness === 8) {
-      effectivenessText = "8x effectiveness";
-    } else {
-      effectivenessText = ${effectiveness}x effectiveness;
-    }
-
-    // Categorize the effectiveness
-    if (effectiveness >= 2) {
-      weaknesses.push(<p>Against ${opponent}: ${effectivenessText}</p>);
-    } else if (effectiveness < 1) {
-      resistances.push(<p>Against ${opponent}: ${effectivenessText}</p>);
-    } else {
-      resistances.push(<p>Against ${opponent}: ${effectivenessText}</p>);
+      immunities.add(opponent); // Ensure opponent is recorded as immune
+    } else if (effectiveness > 1) {
+      // Weaknesses: Effectiveness greater than 1 (e.g., 2x, 4x, 8x)
+      effectivenessText = `${effectiveness}x effectiveness`;
+      weaknesses.push(`<p><strong>Combined types</strong> against ${opponent}: ${effectivenessText}</p>`); // 2x, 4x, etc.
+    } else if (effectiveness >= 0.1 && effectiveness <= 1) {
+      // Resistances: Effectiveness between 0.1 and 1 (e.g., 1x, 0.5x)
+      effectivenessText = effectiveness === 1 ? "Normal effectiveness" : `${effectiveness}x resistance`;
+      resistances.push(`<p><strong>Combined types</strong> against ${opponent}: ${effectivenessText}</p>`); // Normal or resistances
     }
   });
 
-  // Display the weaknesses and resistances
-  resultDiv.innerHTML += "<h2>Weaknesses:</h2>";
-  weaknesses.forEach(weakness => {
-    resultDiv.innerHTML += weakness;
-  });
+  // Display the combined results for weaknesses, resistances, and immunities
+  resultDiv.innerHTML += "<h3>Effectiveness for combined types:</h3>";
 
-  resultDiv.innerHTML += "<h2>Resistances:</h2>";
-  resistances.forEach(resistance => {
-    resultDiv.innerHTML += resistance;
-  });
+  // Display weaknesses
+  resultDiv.innerHTML += "<h4>Weaknesses:</h4>";
+  if (weaknesses.length > 0) {
+    weaknesses.forEach(weakness => {
+      resultDiv.innerHTML += weakness;
+    });
+  } else {
+    resultDiv.innerHTML += "<p>No major weaknesses.</p>";
+  }
+
+  // Display resistances
+  resultDiv.innerHTML += "<h4>Resistances:</h4>";
+  if (resistances.length > 0) {
+    resistances.forEach(resistance => {
+      resultDiv.innerHTML += resistance;
+    });
+  } else {
+    resultDiv.innerHTML += "<p>No major resistances.</p>";
+  }
+
+  // Display immunities
+  resultDiv.innerHTML += "<h4>Immunities:</h4>";
+  if (immunities.size > 0) {
+    immunities.forEach(immunity => {
+      resultDiv.innerHTML += `<p><strong>Combined types</strong> are immune to ${immunity}</p>`;
+    });
+  } else {
+    resultDiv.innerHTML += "<p>No immunities.</p>";
+  }
+
+  resultDiv.innerHTML += "<hr>"; // Add a separator for clarity between calculations
 }
+
 // Wait for the DOM to fully load
 document.addEventListener("DOMContentLoaded", function () {
   const submitButton = document.getElementById("submitButton");
 
   // Use 'click' event for both desktop and mobile
   submitButton.addEventListener("click", function (event) {
-      event.preventDefault();  // Prevent default form submission behavior (if inside a form)
-      calculateEffectiveness();  // Call the function when the button is clicked
+    event.preventDefault();  // Prevent default form submission behavior (if inside a form)
+    calculateEffectiveness();  // Call the function when the button is clicked
   });
-}); 
+});
