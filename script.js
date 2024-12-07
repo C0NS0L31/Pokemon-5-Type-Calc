@@ -363,7 +363,7 @@ const effectivenessMatrix = {
 };
 
 
-// Function to get selected types from all rows
+// Function to get selected types from all rows (unchanged)
 function getSelectedTypes() {
   let selectedTypes = [];
   for (let i = 1; i <= 5; i++) {
@@ -375,7 +375,8 @@ function getSelectedTypes() {
   return selectedTypes;
 }
 
-// Function to calculate effectiveness
+// Replace the old calculateEffectiveness with the updated version:
+
 function calculateEffectiveness() {
   const selectedTypes = getSelectedTypes(); // Get selected types
   
@@ -387,73 +388,87 @@ function calculateEffectiveness() {
     return;
   }
 
-  const combinedEffectiveness = {};
-
-  // Loop through each selected type
+  // Loop through each selected type and calculate effectiveness for each
   selectedTypes.forEach(type => {
+    const combinedEffectiveness = {}; // Initialize combined effectiveness for the current type
+
+    // Loop through each type in the effectiveness matrix
     for (let opponent in effectivenessMatrix[type]) {
       if (!combinedEffectiveness[opponent]) {
-        combinedEffectiveness[opponent] = 1; // Initialize multiplier
+        combinedEffectiveness[opponent] = 1; // Initialize multiplier for the opponent type
       }
       combinedEffectiveness[opponent] *= effectivenessMatrix[type][opponent]; // Multiply effectiveness
     }
-  });
 
-  // Convert the combinedEffectiveness object to an array of [opponent, effectiveness] pairs
-  const effectivenessArray = Object.entries(combinedEffectiveness);
+    // Convert the combinedEffectiveness object to an array of [opponent, effectiveness] pairs
+    const effectivenessArray = Object.entries(combinedEffectiveness);
 
-  // Sort the array by effectiveness (highest to lowest)
-  effectivenessArray.sort((a, b) => b[1] - a[1]);
+    // Sort the array by effectiveness (highest to lowest)
+    effectivenessArray.sort((a, b) => b[1] - a[1]);
 
-  // Create separate arrays for weaknesses and resistances
-  const weaknesses = [];
-  const resistances = [];
+    // Create separate arrays for weaknesses and resistances for the current type
+    const weaknesses = [];
+    const resistances = [];
 
-  // Categorize types based on effectiveness
-  effectivenessArray.forEach(([opponent, effectiveness]) => {
-    let effectivenessText = "";
-    if (effectiveness === 0) {
-      effectivenessText = "No effect";
-    } else if (effectiveness === 1) {
-      effectivenessText = "Normal effectiveness";
-    } else if (effectiveness === 2) {
-      effectivenessText = "2x effectiveness";
-    } else if (effectiveness === 4) {
-      effectivenessText = "4x effectiveness";
-    } else if (effectiveness === 8) {
-      effectivenessText = "8x effectiveness";
+    // Categorize types based on effectiveness
+    effectivenessArray.forEach(([opponent, effectiveness]) => {
+      let effectivenessText = "";
+      if (effectiveness === 0) {
+        effectivenessText = "No effect";
+      } else if (effectiveness === 1) {
+        effectivenessText = "Normal effectiveness";
+      } else if (effectiveness === 2) {
+        effectivenessText = "2x effectiveness";
+      } else if (effectiveness === 4) {
+        effectivenessText = "4x effectiveness";
+      } else if (effectiveness === 8) {
+        effectivenessText = "8x effectiveness";
+      } else {
+        effectivenessText = `${effectiveness}x effectiveness`;
+      }
+
+      // Categorize the effectiveness
+      if (effectiveness >= 2) {
+        weaknesses.push(`<p><strong>${type}</strong> against ${opponent}: ${effectivenessText}</p>`);
+      } else if (effectiveness < 1) {
+        resistances.push(`<p><strong>${type}</strong> against ${opponent}: ${effectivenessText}</p>`);
+      } else {
+        resistances.push(`<p><strong>${type}</strong> against ${opponent}: ${effectivenessText}</p>`);
+      }
+    });
+
+    // Display the weaknesses and resistances for the current type
+    resultDiv.innerHTML += `<h3>Effectiveness for ${type}:</h3>`;
+
+    resultDiv.innerHTML += "<h4>Weaknesses:</h4>";
+    if (weaknesses.length > 0) {
+      weaknesses.forEach(weakness => {
+        resultDiv.innerHTML += weakness;
+      });
     } else {
-      effectivenessText = `${effectiveness}x effectiveness`;
+      resultDiv.innerHTML += "<p>No major weaknesses.</p>";
     }
 
-    // Categorize the effectiveness
-    if (effectiveness >= 2) {
-      weaknesses.push(`<p>Against ${opponent}: ${effectivenessText}</p>`);
-    } else if (effectiveness < 1) {
-      resistances.push(`<p>Against ${opponent}: ${effectivenessText}</p>`);
+    resultDiv.innerHTML += "<h4>Resistances:</h4>";
+    if (resistances.length > 0) {
+      resistances.forEach(resistance => {
+        resultDiv.innerHTML += resistance;
+      });
     } else {
-      resistances.push(`<p>Against ${opponent}: ${effectivenessText}</p>`);
+      resultDiv.innerHTML += "<p>No major resistances.</p>";
     }
-  });
 
-  // Display the weaknesses and resistances
-  resultDiv.innerHTML += "<h2>Weaknesses:</h2>";
-  weaknesses.forEach(weakness => {
-    resultDiv.innerHTML += weakness;
-  });
-
-  resultDiv.innerHTML += "<h2>Resistances:</h2>";
-  resistances.forEach(resistance => {
-    resultDiv.innerHTML += resistance;
+    resultDiv.innerHTML += "<hr>"; // Add a separator for clarity between types
   });
 }
+
 // Wait for the DOM to fully load
 document.addEventListener("DOMContentLoaded", function () {
   const submitButton = document.getElementById("submitButton");
 
   // Use 'click' event for both desktop and mobile
   submitButton.addEventListener("click", function (event) {
-      event.preventDefault();  // Prevent default form submission behavior (if inside a form)
-      calculateEffectiveness();  // Call the function when the button is clicked
+    event.preventDefault();  // Prevent default form submission behavior (if inside a form)
+    calculateEffectiveness();  // Call the function when the button is clicked
   });
 });
