@@ -302,7 +302,7 @@ const effectivenessMatrix = {
   },
   "Ice": {
     "Fire": 2,
-    "Water": 0,
+    "Water": 1,
     "Grass": 1,
     "Electric": 1,
     "Bug": 1,
@@ -421,11 +421,10 @@ function calculateEffectiveness() {
   // Loop through the effectiveness array to categorize types
   effectivenessArray.forEach(([opponent, effectiveness]) => {
     let effectivenessText = "";
-    
-    // Check for immunity (effectiveness 0)
-    if (effectiveness === 0) {
+
+    // Prioritize Immunities: If the opponent is immune to any selected type
+    if (immunities.has(opponent)) {
       effectivenessText = "No effect";
-      immunities.add(opponent); // Ensure opponent is recorded as immune
     } else if (effectiveness > 1) {
       // Weaknesses: Effectiveness greater than 1 (e.g., 2x, 4x, 8x)
       effectivenessText = `${effectiveness}x effectiveness`;
@@ -464,6 +463,7 @@ function calculateEffectiveness() {
   resultDiv.innerHTML += "<h4>Immunities:</h4>";
   if (immunities.size > 0) {
     immunities.forEach(immunity => {
+      // Display immunity only if it is not already in weaknesses or resistances
       resultDiv.innerHTML += `<p><strong>Combined types</strong> are immune to ${immunity}</p>`;
     });
   } else {
@@ -472,6 +472,10 @@ function calculateEffectiveness() {
 
   resultDiv.innerHTML += "<hr>"; // Add a separator for clarity between calculations
 }
+
+
+
+
 
 // Wait for the DOM to fully load
 document.addEventListener("DOMContentLoaded", function () {
