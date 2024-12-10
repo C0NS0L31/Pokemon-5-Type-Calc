@@ -421,58 +421,94 @@ function calculateEffectiveness() {
   // Loop through the effectiveness array to categorize types
   effectivenessArray.forEach(([opponent, effectiveness]) => {
     let effectivenessText = "";
-
-    // Prioritize Immunities: If the opponent is immune to any selected type
+    const backgroundColor = typeColors[opponent] || "black"; // Default to black if no color is found
+  
+    // Create the text-shadow effect for black outline
+    const textShadow = "2px 2px 4px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.9)";
+  
+    // Prioritize Immunities
     if (immunities.has(opponent)) {
-      effectivenessText = "No effect";
+      effectivenessText = `
+        <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
+          ${opponent}: No effect
+        </span>`;
     } else if (effectiveness > 1) {
-      // Weaknesses: Effectiveness greater than 1 (e.g., 2x, 4x, 8x)
-      effectivenessText = `${effectiveness}x effectiveness`;
-      weaknesses.push(`<p><strong>Combined types</strong> against ${opponent}: ${effectivenessText}</p>`); // 2x, 4x, etc.
+      // Weaknesses
+      effectivenessText = `
+        <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
+          ${opponent}: ${effectiveness}x effectiveness
+        </span>`;
+      weaknesses.push(effectivenessText);
     } else if (effectiveness >= 0.01 && effectiveness <= 1) {
-      // Resistances: Effectiveness between 0.01 and 1 (e.g., 1x, 0.5x)
-      effectivenessText = effectiveness === 1 ? "Normal effectiveness" : `${effectiveness}x resistance`;
-      resistances.push(`<p><strong>Combined types</strong> against ${opponent}: ${effectivenessText}</p>`); // Normal or resistances
+      // Resistances
+      effectivenessText = `
+        <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
+          ${opponent}: ${effectiveness === 1 ? "Normal effectiveness" : `${effectiveness}x resistance`}
+        </span>`;
+      resistances.push(effectivenessText);
     }
   });
-
-  // Display the combined results for weaknesses, resistances, and immunities
-  resultDiv.innerHTML += "<h3>Effectiveness for combined types:</h3>";
-
-  // Display weaknesses
+  
+  // Update the result display
   resultDiv.innerHTML += "<h4>Weaknesses:</h4>";
   if (weaknesses.length > 0) {
     weaknesses.forEach(weakness => {
-      resultDiv.innerHTML += weakness;
+      resultDiv.innerHTML += `<p>${weakness}</p>`;
     });
   } else {
     resultDiv.innerHTML += "<p>No major weaknesses.</p>";
   }
-
-  // Display resistances
+  
   resultDiv.innerHTML += "<h4>Resistances:</h4>";
   if (resistances.length > 0) {
     resistances.forEach(resistance => {
-      resultDiv.innerHTML += resistance;
+      resultDiv.innerHTML += `<p>${resistance}</p>`;
     });
   } else {
     resultDiv.innerHTML += "<p>No major resistances.</p>";
   }
-
-  // Display immunities
+  
   resultDiv.innerHTML += "<h4>Immunities:</h4>";
   if (immunities.size > 0) {
     immunities.forEach(immunity => {
-      // Display immunity only if it is not already in weaknesses or resistances
-      resultDiv.innerHTML += `<p><strong>Combined types</strong> are immune to ${immunity}</p>`;
+      const backgroundColor = typeColors[immunity] || "black";
+      resultDiv.innerHTML += `
+        <p>
+          <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
+            ${immunity}: Immune
+          </span>
+        </p>`;
     });
   } else {
     resultDiv.innerHTML += "<p>No immunities.</p>";
   }
+  
+  
+
 
   resultDiv.innerHTML += "<hr>"; // Add a separator for clarity between calculations
 }
 
+const typeColors = {
+  "Fire": "red",
+  "Water": "blue",
+  "Grass": "green",
+  "Electric": "yellow",
+  "Bug": "olive",
+  "Flying": "skyblue",
+  "Dragon": "purple",
+  "Fairy": "pink",
+  "Dark": "black",
+  "Ghost": "indigo",
+  "Poison": "violet",
+  "Steel": "gray",
+  "Fighting": "brown",
+  "Psychic": "magenta",
+  "Normal": "silver",
+  "Ice": "cyan",
+  "Rock": "goldenrod",
+  "Ground": "sienna"
+};
 
 
 
