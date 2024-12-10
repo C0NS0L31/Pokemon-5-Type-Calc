@@ -474,7 +474,7 @@ function calculateEffectiveness() {
       const backgroundColor = typeColors[immunity] || "black";
       resultDiv.innerHTML += `
         <p>
-          <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
+          <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.9);">
             ${immunity}: Immune
           </span>
         </p>`;
@@ -482,9 +482,6 @@ function calculateEffectiveness() {
   } else {
     resultDiv.innerHTML += "<p>No immunities.</p>";
   }
-  
-  
-
 
   resultDiv.innerHTML += "<hr>"; // Add a separator for clarity between calculations
 }
