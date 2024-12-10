@@ -44,3 +44,33 @@ body {
   background-color: #333; /* Dark grey */
   color: #f5f5f5; /* Light color for text to ensure readability */
 }
+
+/* Type-specific styles */
+.type-Fire { color: red; }
+.type-Water { color: blue; }
+.type-Grass { color: green; }
+.type-Electric { color: yellow; }
+.type-Bug { color: olive; }
+.type-Flying { color: skyblue; }
+.type-Dragon { color: purple; }
+.type-Fairy { color: pink; }
+.type-Dark { color: darkgray; }
+.type-Ghost { color: indigo; }
+.type-Poison { color: violet; }
+.type-Steel { color: silver; }
+.type-Fighting { color: brown; }
+.type-Psychic { color: magenta; }
+.type-Normal { color: black; }
+.type-Ice { color: lightblue; }
+.type-Rock { color: sienna; }
+.type-Ground { color: tan; }
+.type-None { color: gray; }
+
+.type-box {
+  display: inline-block; 
+  padding: 5px 10px; /* Adjust padding for desired size */
+  border-radius: 5px; /* Rounded corners */
+  margin: 2px; /* Small spacing between boxes */
+  color: white; /* White text for contrast */
+  font-weight: bold;
+}
