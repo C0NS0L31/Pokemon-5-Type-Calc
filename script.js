@@ -438,10 +438,6 @@ if (modifiedEffectiveness === 0) {
 }
 
 
-      // Check for immunity for the current type and add to immunities set if necessary
-      if (effectivenessMatrix[type][opponent] === 0) {
-        immunities.add(opponent); // Add opponent to immunities if immune (effectiveness 0)
-      }
     }
   });
 
