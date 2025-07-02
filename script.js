@@ -378,7 +378,37 @@ function getSelectedTypes() {
 // Updated function to calculate and display combined effectiveness, including immunities
 function calculateEffectiveness() {
   const selectedTypes = getSelectedTypes(); // Get selected types
-  
+
+  // Get selected ability and item
+const selectedAbility = document.getElementById("ability").value;
+const selectedItem = document.getElementById("item").value;
+
+// Modify effectiveness based on ability or item
+function applyAbilityAndItemImmunities(opponentType, baseEffectiveness) {
+  // Ability-based immunities
+  if (selectedAbility === "Levitate" && opponentType === "Ground") {
+    return 0;
+  }
+  if (selectedAbility === "Flash Fire" && opponentType === "Fire") {
+    return 0;
+  }
+  if (selectedAbility === "Thick Fat" && (opponentType === "Fire" || opponentType === "Ice")) {
+    return baseEffectiveness * 0.5;
+  }
+
+  // Item-based immunities
+  if (selectedItem === "Air Balloon" && opponentType === "Ground") {
+    return 0;
+  }
+  if (selectedItem === "Safety Goggles" && (opponentType === "Powder" || opponentType === "Weather")) {
+    // These are placeholder types, adjust if you’re modeling specific effects
+    return 0;
+  }
+
+  // Return original value if no modifications
+  return baseEffectiveness;
+}
+
   const resultDiv = document.getElementById('result');
   resultDiv.innerHTML = ""; // Clear previous results
 
@@ -399,7 +429,14 @@ function calculateEffectiveness() {
       if (!combinedEffectiveness[opponent]) {
         combinedEffectiveness[opponent] = 1; // Initialize with 1 for multiplication
       }
-      combinedEffectiveness[opponent] *= effectivenessMatrix[type][opponent]; // Multiply effectiveness values
+      const modifiedEffectiveness = applyAbilityAndItemImmunities(opponent, effectivenessMatrix[type][opponent]);
+combinedEffectiveness[opponent] *= modifiedEffectiveness;
+
+// Track immunities
+if (modifiedEffectiveness === 0) {
+  immunities.add(opponent);
+}
+
 
       // Check for immunity for the current type and add to immunities set if necessary
       if (effectivenessMatrix[type][opponent] === 0) {
