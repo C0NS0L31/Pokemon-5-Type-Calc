@@ -442,7 +442,6 @@ function applyAbilityAndItemImmunities(opponentType, baseEffectiveness) {
 
   if (selectedTypes.length === 0) {
     alert("Please select at least one Pokémon type.");
-  //  return;
   }
 
   // Initialize combined effectiveness map
