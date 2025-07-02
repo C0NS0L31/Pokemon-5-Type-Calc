@@ -432,12 +432,9 @@ function applyAbilityAndItemImmunities(opponentType, baseEffectiveness) {
       return 0;
     }
   }
-
   return baseEffectiveness;
 }
-
-  // Return original value if no modifications
-  return baseEffectiveness;
+  
 }
 
   const resultDiv = document.getElementById('result');
