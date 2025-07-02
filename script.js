@@ -374,36 +374,67 @@ function getSelectedTypes() {
   }
   return selectedTypes;
 }
+// NEW: Get all selected abilities (assumes inputs have ids ability1, ability2, ability3)
+function getSelectedAbilities() {
+  const abilities = [];
+  for (let i = 1; i <= 3; i++) {
+    const ability = document.getElementById(`ability${i}`).value;
+    if (ability !== "None") {
+      abilities.push(ability);
+    }
+  }
+  return abilities;
+}
+
+// NEW: Get all selected items (assumes inputs have ids item1, item2, item3)
+function getSelectedItems() {
+  const items = [];
+  for (let i = 1; i <= 3; i++) {
+    const item = document.getElementById(`item${i}`).value;
+    if (item !== "None") {
+      items.push(item);
+    }
+  }
+  return items;
+}
 
 // Updated function to calculate and display combined effectiveness, including immunities
 function calculateEffectiveness() {
   const selectedTypes = getSelectedTypes(); // Get selected types
 
   // Get selected ability and item
-const selectedAbility = document.getElementById("ability").value;
-const selectedItem = document.getElementById("item").value;
+// NEW: get arrays of all selected abilities and items
+const selectedAbilities = getSelectedAbilities();
+const selectedItems = getSelectedItems();
+
 
 // Modify effectiveness based on ability or item
 function applyAbilityAndItemImmunities(opponentType, baseEffectiveness) {
-  // Ability-based immunities
-  if (selectedAbility === "Levitate" && opponentType === "Ground") {
-    return 0;
-  }
-  if (selectedAbility === "Flash Fire" && opponentType === "Fire") {
-    return 0;
-  }
-  if (selectedAbility === "Thick Fat" && (opponentType === "Fire" || opponentType === "Ice")) {
-    return baseEffectiveness * 0.5;
+  // Check all selected abilities
+  for (const ability of selectedAbilities) {
+    if (ability === "Levitate" && opponentType === "Ground") {
+      return 0;
+    }
+    if (ability === "Flash Fire" && opponentType === "Fire") {
+      return 0;
+    }
+    if (ability === "Thick Fat" && (opponentType === "Fire" || opponentType === "Ice")) {
+      baseEffectiveness *= 0.5;
+    }
   }
 
-  // Item-based immunities
-  if (selectedItem === "Air Balloon" && opponentType === "Ground") {
-    return 0;
+  // Check all selected items
+  for (const item of selectedItems) {
+    if (item === "Air Balloon" && opponentType === "Ground") {
+      return 0;
+    }
+    if (item === "Safety Goggles" && (opponentType === "Powder" || opponentType === "Weather")) {
+      return 0;
+    }
   }
-  if (selectedItem === "Safety Goggles" && (opponentType === "Powder" || opponentType === "Weather")) {
-    // These are placeholder types, adjust if you’re modeling specific effects
-    return 0;
-  }
+
+  return baseEffectiveness;
+}
 
   // Return original value if no modifications
   return baseEffectiveness;
