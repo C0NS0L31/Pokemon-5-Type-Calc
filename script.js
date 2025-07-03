@@ -1,3 +1,4 @@
+document.addEventListener('DOMContentLoaded', () => {
 // Effectiveness matrix (example for a few types)
 const effectivenessMatrix = {
   "Fire": {
@@ -567,4 +568,5 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("addItem").addEventListener("click", () => {
     addDropdown("itemsContainer", "item-select", itemOptions, 10, "Item");
   });
+});
 });
