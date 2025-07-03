@@ -544,7 +544,7 @@ if (modifiedEffectiveness === 0) {
   }
 
   resultDiv.innerHTML += "<hr>"; // Add a separator for clarity between calculations
-}
+
 
 const typeColors = {
   "Fire": "red",
