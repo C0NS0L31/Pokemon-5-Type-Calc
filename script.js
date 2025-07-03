@@ -411,6 +411,9 @@ function calculateEffectiveness() {
       if (ability === "Levitate" && opponentType === "Ground") {
         return 0;
       }
+      if (ability === "NOLIGHTNING" && opponentType === "Electric") {
+        return 0;
+      }
       if (ability === "Flash Fire" && opponentType === "Fire") {
         return 0;
       }
