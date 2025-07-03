@@ -74,3 +74,28 @@ body {
   color: white; /* White text for contrast */
   font-weight: bold;
 }
+/* Remove button next to each dynamic dropdown */
+.remove-button {
+  background-color: transparent;
+  border: none;
+  color: #f44336; /* Red color */
+  font-weight: bold;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: 8px;
+  vertical-align: middle;
+  transition: color 0.3s ease;
+  padding: 0;
+}
+
+.remove-button:hover {
+  color: #ff7961; /* Lighter red on hover */
+}
+
+/* Style the wrapper so dropdown + remove button align nicely */
+.dropdown-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
