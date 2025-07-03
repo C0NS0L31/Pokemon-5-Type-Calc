@@ -401,106 +401,87 @@ function getSelectedItems() {
 // Updated function to calculate and display combined effectiveness, including immunities
 function calculateEffectiveness() {
   const selectedTypes = getSelectedTypes(); // Get selected types
+  const selectedAbilities = getSelectedAbilities(); // Get selected abilities
+  const selectedItems = getSelectedItems(); // Get selected items
 
-  // Get selected ability and item
-// NEW: get arrays of all selected abilities and items
-const selectedAbilities = getSelectedAbilities();
-const selectedItems = getSelectedItems();
+  // Modify effectiveness based on ability or item
+  function applyAbilityAndItemImmunities(opponentType, baseEffectiveness) {
+    // Check all selected abilities
+    for (const ability of selectedAbilities) {
+      if (ability === "Levitate" && opponentType === "Ground") {
+        return 0;
+      }
+      if (ability === "Flash Fire" && opponentType === "Fire") {
+        return 0;
+      }
+      if (ability === "Thick Fat" && (opponentType === "Fire" || opponentType === "Ice")) {
+        baseEffectiveness *= 0.5;
+      }
+    }
 
+    // Check all selected items
+    for (const item of selectedItems) {
+      if (item === "Air Balloon" && opponentType === "Ground") {
+        return 0;
+      }
+      if (item === "Safety Goggles" && (opponentType === "Powder" || opponentType === "Weather")) {
+        return 0;
+      }
+    }
 
-// Modify effectiveness based on ability or item
-function applyAbilityAndItemImmunities(opponentType, baseEffectiveness) {
-  // Check all selected abilities
-  for (const ability of selectedAbilities) {
-    if (ability === "Levitate" && opponentType === "Ground") {
-      return 0;
-    }
-    if (ability === "Flash Fire" && opponentType === "Fire") {
-      return 0;
-    }
-    if (ability === "Thick Fat" && (opponentType === "Fire" || opponentType === "Ice")) {
-      baseEffectiveness *= 0.5;
-    }
+    return baseEffectiveness;
   }
-
-  // Check all selected items
-  for (const item of selectedItems) {
-    if (item === "Air Balloon" && opponentType === "Ground") {
-      return 0;
-    }
-    if (item === "Safety Goggles" && (opponentType === "Powder" || opponentType === "Weather")) {
-      return 0;
-    }
-  }
-  return baseEffectiveness;
-}
-  
-}
 
   const resultDiv = document.getElementById('result');
   resultDiv.innerHTML = ""; // Clear previous results
 
   if (selectedTypes.length === 0) {
     alert("Please select at least one Pokémon type.");
+    return; // Prevent further execution
   }
 
   // Initialize combined effectiveness map
   const combinedEffectiveness = {};
+  const immunities = new Set(); // To track types with 0x effectiveness
 
-  // Initialize an array to store immunities
-  const immunities = new Set(); // Set will avoid duplicate immunities
-
-  // Loop through each selected type and calculate effectiveness
+  // Calculate effectiveness for each selected type
   selectedTypes.forEach(type => {
     for (let opponent in effectivenessMatrix[type]) {
       if (!combinedEffectiveness[opponent]) {
-        combinedEffectiveness[opponent] = 1; // Initialize with 1 for multiplication
+        combinedEffectiveness[opponent] = 1;
       }
       const modifiedEffectiveness = applyAbilityAndItemImmunities(opponent, effectivenessMatrix[type][opponent]);
-combinedEffectiveness[opponent] *= modifiedEffectiveness;
+      combinedEffectiveness[opponent] *= modifiedEffectiveness;
 
-// Track immunities
-if (modifiedEffectiveness === 0) {
-  immunities.add(opponent);
-}
-
-
+      if (modifiedEffectiveness === 0) {
+        immunities.add(opponent);
+      }
     }
   });
 
-  // Convert the combinedEffectiveness object to an array of [opponent, effectiveness] pairs
   const effectivenessArray = Object.entries(combinedEffectiveness);
-
-  // Sort the array by effectiveness (highest to lowest)
   effectivenessArray.sort((a, b) => b[1] - a[1]);
 
-  // Create arrays to categorize weaknesses, resistances, and immunities
   const weaknesses = [];
   const resistances = [];
 
-  // Loop through the effectiveness array to categorize types
   effectivenessArray.forEach(([opponent, effectiveness]) => {
-    let effectivenessText = "";
-    const backgroundColor = typeColors[opponent] || "black"; // Default to black if no color is found
-  
-    // Create the text-shadow effect for black outline
+    const backgroundColor = typeColors[opponent] || "black";
     const textShadow = "2px 2px 4px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.9)";
-  
-    // Prioritize Immunities
+    let effectivenessText = "";
+
     if (immunities.has(opponent)) {
       effectivenessText = `
         <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
           ${opponent}: No effect
         </span>`;
     } else if (effectiveness > 1) {
-      // Weaknesses
       effectivenessText = `
         <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
           ${opponent}: ${effectiveness}x effectiveness
         </span>`;
       weaknesses.push(effectivenessText);
     } else if (effectiveness >= 0.01 && effectiveness <= 1) {
-      // Resistances
       effectivenessText = `
         <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
           ${opponent}: ${effectiveness === 1 ? "Normal effectiveness" : `${effectiveness}x resistance`}
@@ -508,26 +489,13 @@ if (modifiedEffectiveness === 0) {
       resistances.push(effectivenessText);
     }
   });
-  
-  // Update the result display
+
   resultDiv.innerHTML += "<h4>Weaknesses:</h4>";
-  if (weaknesses.length > 0) {
-    weaknesses.forEach(weakness => {
-      resultDiv.innerHTML += `<p>${weakness}</p>`;
-    });
-  } else {
-    resultDiv.innerHTML += "<p>No major weaknesses.</p>";
-  }
-  
+  resultDiv.innerHTML += weaknesses.length ? weaknesses.map(w => `<p>${w}</p>`).join("") : "<p>No major weaknesses.</p>";
+
   resultDiv.innerHTML += "<h4>Resistances:</h4>";
-  if (resistances.length > 0) {
-    resistances.forEach(resistance => {
-      resultDiv.innerHTML += `<p>${resistance}</p>`;
-    });
-  } else {
-    resultDiv.innerHTML += "<p>No major resistances.</p>";
-  }
-  
+  resultDiv.innerHTML += resistances.length ? resistances.map(r => `<p>${r}</p>`).join("") : "<p>No major resistances.</p>";
+
   resultDiv.innerHTML += "<h4>Immunities:</h4>";
   if (immunities.size > 0) {
     immunities.forEach(immunity => {
@@ -543,8 +511,8 @@ if (modifiedEffectiveness === 0) {
     resultDiv.innerHTML += "<p>No immunities.</p>";
   }
 
-  resultDiv.innerHTML += "<hr>"; // Add a separator for clarity between calculations
-
+  resultDiv.innerHTML += "<hr>";
+}
 
 const typeColors = {
   "Fire": "red",
