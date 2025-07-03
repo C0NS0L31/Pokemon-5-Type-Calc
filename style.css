@@ -74,6 +74,7 @@ body {
   color: white; /* White text for contrast */
   font-weight: bold;
 }
+
 /* Remove button next to each dynamic dropdown */
 .remove-button {
   background-color: transparent;
@@ -99,3 +100,21 @@ body {
   margin-bottom: 8px;
 }
 
+/* Make add buttons smaller, matching dropdown size */
+.add-button {
+  padding: 5px 10px;
+  font-size: 1em;
+  margin-top: 4px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  width: auto; /* fit content */
+  display: inline-block;
+}
+
+.add-button:hover {
+  background-color: #45a049;
+}
