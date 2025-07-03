@@ -521,3 +521,4 @@ document.addEventListener("DOMContentLoaded", () => {
     addDropdown("items-container", "item-select", itemOptions, 10);
   });
 });
+});
