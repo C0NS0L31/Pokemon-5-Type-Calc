@@ -1,4 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
 // Effectiveness matrix (example for a few types)
 const effectivenessMatrix = {
   "Fire": {
@@ -364,7 +363,157 @@ const effectivenessMatrix = {
 };
 
 
-// Type colors (also unchanged)
+// Function to get selected types from all rows
+function getSelectedTypes() {
+  let selectedTypes = [];
+  for (let i = 1; i <= 5; i++) {
+    const type = document.getElementById(`type${i}`).value;
+    if (type !== "None") { // Only add types that are not "None"
+      selectedTypes.push(type);
+    }
+  }
+  return selectedTypes;
+}
+// NEW: Get all selected abilities (assumes inputs have ids ability1, ability2, ability3)
+function getSelectedAbilities() {
+  const abilities = [];
+  for (let i = 1; i <= 3; i++) {
+    const ability = document.getElementById(`ability${i}`).value;
+    if (ability !== "None") {
+      abilities.push(ability);
+    }
+  }
+  return abilities;
+}
+
+// NEW: Get all selected items (assumes inputs have ids item1, item2, item3)
+function getSelectedItems() {
+  const items = [];
+  for (let i = 1; i <= 3; i++) {
+    const item = document.getElementById(`item${i}`).value;
+    if (item !== "None") {
+      items.push(item);
+    }
+  }
+  return items;
+}
+
+// Updated function to calculate and display combined effectiveness, including immunities
+function calculateEffectiveness() {
+  const selectedTypes = getSelectedTypes(); // Get selected types
+  const selectedAbilities = getSelectedAbilities(); // Get selected abilities
+  const selectedItems = getSelectedItems(); // Get selected items
+
+  // Modify effectiveness based on ability or item
+  function applyAbilityAndItemImmunities(opponentType, baseEffectiveness) {
+    // Check all selected abilities
+    for (const ability of selectedAbilities) {
+      if (ability === "Levitate" && opponentType === "Ground") {
+        return 0;
+      }
+      if (ability === "Flash Fire" && opponentType === "Fire") {
+        return 0;
+      }
+      if (ability === "Thick Fat" && (opponentType === "Fire" || opponentType === "Ice")) {
+        baseEffectiveness *= 0.5;
+      }
+    }
+
+    // Check all selected items
+    for (const item of selectedItems) {
+      if (item === "Air Balloon" && opponentType === "Ground") {
+        return 0;
+      }
+      if (item === "Safety Goggles" && (opponentType === "Powder" || opponentType === "Weather")) {
+        return 0;
+      }
+    }
+
+    return baseEffectiveness;
+  }
+
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = ""; // Clear previous results
+
+  if (selectedTypes.length === 0) {
+    alert("Please select at least one Pokémon type.");
+    return; // Prevent further execution
+  }
+
+  // Initialize combined effectiveness map
+  const combinedEffectiveness = {};
+  const immunities = new Set(); // To track types with 0x effectiveness
+
+  // Calculate effectiveness for each selected type
+  selectedTypes.forEach(type => {
+    for (let opponent in effectivenessMatrix[type]) {
+      if (!combinedEffectiveness[opponent]) {
+        combinedEffectiveness[opponent] = 1;
+      }
+      const modifiedEffectiveness = applyAbilityAndItemImmunities(opponent, effectivenessMatrix[type][opponent]);
+      combinedEffectiveness[opponent] *= modifiedEffectiveness;
+
+      if (modifiedEffectiveness === 0) {
+        immunities.add(opponent);
+      }
+    }
+  });
+
+  const effectivenessArray = Object.entries(combinedEffectiveness);
+  effectivenessArray.sort((a, b) => b[1] - a[1]);
+
+  const weaknesses = [];
+  const resistances = [];
+
+  effectivenessArray.forEach(([opponent, effectiveness]) => {
+    const backgroundColor = typeColors[opponent] || "black";
+    const textShadow = "2px 2px 4px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.9)";
+    let effectivenessText = "";
+
+    if (immunities.has(opponent)) {
+      effectivenessText = `
+        <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
+          ${opponent}: No effect
+        </span>`;
+    } else if (effectiveness > 1) {
+      effectivenessText = `
+        <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
+          ${opponent}: ${effectiveness}x effectiveness
+        </span>`;
+      weaknesses.push(effectivenessText);
+    } else if (effectiveness >= 0.01 && effectiveness <= 1) {
+      effectivenessText = `
+        <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: ${textShadow};">
+          ${opponent}: ${effectiveness === 1 ? "Normal effectiveness" : `${effectiveness}x resistance`}
+        </span>`;
+      resistances.push(effectivenessText);
+    }
+  });
+
+  resultDiv.innerHTML += "<h4>Weaknesses:</h4>";
+  resultDiv.innerHTML += weaknesses.length ? weaknesses.map(w => `<p>${w}</p>`).join("") : "<p>No major weaknesses.</p>";
+
+  resultDiv.innerHTML += "<h4>Resistances:</h4>";
+  resultDiv.innerHTML += resistances.length ? resistances.map(r => `<p>${r}</p>`).join("") : "<p>No major resistances.</p>";
+
+  resultDiv.innerHTML += "<h4>Immunities:</h4>";
+  if (immunities.size > 0) {
+    immunities.forEach(immunity => {
+      const backgroundColor = typeColors[immunity] || "black";
+      resultDiv.innerHTML += `
+        <p>
+          <span class="type-box" style="background-color: ${backgroundColor}; color: white; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), -2px -2px 4px rgba(0, 0, 0, 0.9);">
+            ${immunity}: Immune
+          </span>
+        </p>`;
+    });
+  } else {
+    resultDiv.innerHTML += "<p>No immunities.</p>";
+  }
+
+  resultDiv.innerHTML += "<hr>";
+}
+
 const typeColors = {
   "Fire": "red",
   "Water": "blue",
@@ -386,139 +535,16 @@ const typeColors = {
   "Ground": "sienna"
 };
 
-// Get selected types
-// --- Helper Functions ---
-function getSelectedTypes() {
-  const types = [];
-  for (let i = 1; i <= 5; i++) {
-    const val = document.getElementById(`type${i}`).value;
-    if (val !== "None") types.push(val);
-  }
-  return types;
-}
 
-function getSelectedAbilities() {
-  return Array.from(document.querySelectorAll(".ability-select"))
-    .map(sel => sel.value)
-    .filter(val => val !== "None");
-}
 
-function getSelectedItems() {
-  return Array.from(document.querySelectorAll(".item-select"))
-    .map(sel => sel.value)
-    .filter(val => val !== "None");
-}
 
-function applyAbilityAndItemImmunities(opponentType, baseEffectiveness, abilities, items) {
-  for (const ab of abilities) {
-    if (ab === "Levitate" && opponentType === "Ground") return 0;
-    if (ab === "Flash Fire" && opponentType === "Fire") return 0;
-    if (ab === "Thick Fat" && (opponentType === "Fire" || opponentType === "Ice")) {
-      baseEffectiveness *= 0.5;
-    }
-  }
-  for (const item of items) {
-    if (item === "Air Balloon" && opponentType === "Ground") return 0;
-    if (item === "Safety Goggles" && (opponentType === "Powder" || opponentType === "Weather")) return 0;
-  }
-  return baseEffectiveness;
-}
+// Wait for the DOM to fully load
+document.addEventListener("DOMContentLoaded", function () {
+  const submitButton = document.getElementById("submitButton");
 
-function calculateEffectiveness() {
-  const selectedTypes = getSelectedTypes();
-  const abilities = getSelectedAbilities();
-  const items = getSelectedItems();
-  const resultDiv = document.getElementById("result");
-  resultDiv.innerHTML = "";
-
-  if (selectedTypes.length === 0) {
-    alert("Please select at least one type.");
-    return;
-  }
-
-  const combinedEffectiveness = {};
-  const immunities = new Set();
-
-  selectedTypes.forEach(type => {
-    const row = effectivenessMatrix[type];
-    for (const opponent in row) {
-      if (!combinedEffectiveness[opponent]) combinedEffectiveness[opponent] = 1;
-      const mod = applyAbilityAndItemImmunities(opponent, row[opponent], abilities, items);
-      combinedEffectiveness[opponent] *= mod;
-      if (mod === 0) immunities.add(opponent);
-    }
+  // Use 'click' event for both desktop and mobile
+  submitButton.addEventListener("click", function (event) {
+    event.preventDefault();  // Prevent default form submission behavior (if inside a form)
+    calculateEffectiveness();  // Call the function when the button is clicked
   });
-
-  const sorted = Object.entries(combinedEffectiveness).sort((a, b) => b[1] - a[1]);
-  const weaknesses = [], resistances = [];
-
-  sorted.forEach(([opponent, eff]) => {
-    const bg = typeColors[opponent] || "black";
-    const text = eff === 0 ? "Immune" : (eff === 1 ? "Normal" : `${eff}x`);
-    const box = `<span class="type-box" style="background-color: ${bg}; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">${opponent}: ${text}</span>`;
-    if (eff === 0) return;
-    if (eff > 1) weaknesses.push(`<p>${box}</p>`);
-    else resistances.push(`<p>${box}</p>`);
-  });
-
-  resultDiv.innerHTML += "<h4>Weaknesses:</h4>" + (weaknesses.length ? weaknesses.join("") : "<p>None</p>");
-  resultDiv.innerHTML += "<h4>Resistances:</h4>" + (resistances.length ? resistances.join("") : "<p>None</p>");
-  resultDiv.innerHTML += "<h4>Immunities:</h4>";
-  if (immunities.size) {
-    immunities.forEach(type => {
-      const bg = typeColors[type] || "black";
-      resultDiv.innerHTML += `<p><span class="type-box" style="background-color: ${bg}; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">${type}: Immune</span></p>`;
-    });
-  } else {
-    resultDiv.innerHTML += "<p>No immunities.</p>";
-  }
-
-  resultDiv.innerHTML += "<hr>";
-}
-
-// --- Add Dropdown ---
-function addDropdown(containerId, selectClass, options, max) {
-  const container = document.getElementById(containerId);
-  const count = container.querySelectorAll(`.${selectClass}`).length;
-  if (count >= max) return;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "dropdown-wrapper";
-
-  const select = document.createElement("select");
-  select.className = selectClass;
-
-  select.innerHTML = `<option value="None">None</option>` + options.map(opt =>
-    `<option value="${opt}">${opt}</option>`
-  ).join("");
-
-  const removeBtn = document.createElement("button");
-  removeBtn.type = "button";
-  removeBtn.textContent = "❌";
-  removeBtn.className = "remove-button";
-  removeBtn.onclick = () => wrapper.remove();
-
-  wrapper.appendChild(select);
-  wrapper.appendChild(removeBtn);
-  container.appendChild(wrapper);
-}
-
-// --- Event Listeners ---
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("submitButton").addEventListener("click", e => {
-    e.preventDefault();
-    calculateEffectiveness();
-  });
-
-  const abilityOptions = ["Levitate", "Flash Fire", "Thick Fat"];
-  const itemOptions = ["Air Balloon", "Safety Goggles"];
-
-  document.getElementById("addAbilityBtn").addEventListener("click", () => {
-    addDropdown("abilities-container", "ability-select", abilityOptions, 10);
-  });
-
-  document.getElementById("addItemBtn").addEventListener("click", () => {
-    addDropdown("items-container", "item-select", itemOptions, 10);
-  });
-});
 });
