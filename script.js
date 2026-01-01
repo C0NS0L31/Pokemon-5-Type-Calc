@@ -411,7 +411,7 @@ function calculateEffectiveness() {
       if (ability === "Levitate" && opponentType === "Ground") {
         return 0;
       }
-      if (ability === "NOLIGHTNING" && opponentType === "Electric") {
+      if (ability === "NOWATER" && opponentType === "Water") {
         return 0;
       }
       if (ability === "Flash Fire" && opponentType === "Fire") {
@@ -551,3 +551,4 @@ document.addEventListener("DOMContentLoaded", function () {
     calculateEffectiveness();  // Call the function when the button is clicked
   });
 });
+
