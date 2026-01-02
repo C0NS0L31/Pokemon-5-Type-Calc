@@ -366,7 +366,7 @@ const effectivenessMatrix = {
 // Function to get selected types from all rows
 function getSelectedTypes() {
   let selectedTypes = [];
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 10; i++) {
     const type = document.getElementById(`type${i}`).value;
     if (type !== "None") { // Only add types that are not "None"
       selectedTypes.push(type);
@@ -551,4 +551,5 @@ document.addEventListener("DOMContentLoaded", function () {
     calculateEffectiveness();  // Call the function when the button is clicked
   });
 });
+
 
